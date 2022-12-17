@@ -1,0 +1,121 @@
+---
+title: "MBTA EDA"
+author: "Armstrong Wang"
+date: "2022-12-13"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F,results = "hidden",warning = F,message = FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(fmsb)
+```
+
+
+## Data exploration
+I selected stop, stop times and trips data set, combined stops and trips to stop_total and strips. Use distinct to just save the unique value in the data set. The stop time does not change in short period so it just one file. Finally, put them all together to get data, and remove all the duplicate.
+```{r}
+stop1 <- read_csv("stops1.txt") 
+stop2 <- read_csv("stops2.txt")
+stop3 <- read_csv("stops3.txt")
+stop4 <- read_csv("stops4.txt")
+stop5 <- read_csv("stops5.txt")
+stop6 <- read_csv("stops6.txt")
+stop7 <- read_csv("stops7.txt")
+stop8 <- read_csv("stops8.txt")
+stop9 <- read_csv("stops9.txt")
+stop10 <- read_csv("stops10.txt")
+stop11 <- read_csv("stops11.txt")
+stop12 <- read_csv("stops12.txt")
+stop_total <- rbind(stop1,stop2,stop3,stop4,stop5,stop6,stop7,stop8,stop9,stop10,stop11,stop12) %>% 
+   distinct()
+```
+
+```{r}
+stop_times_total <- read_csv("stop_times1.txt")
+```
+
+```{r}
+trips1 <- read_csv("trips1.txt")
+trips2 <- read_csv("trips2.txt")
+trips3 <- read_csv("trips3.txt")
+trips4 <- read_csv("trips4.txt")
+trips5 <- read_csv("trips5.txt")
+trips6 <- read_csv("trips6.txt")
+trips7 <- read_csv("trips7.txt")
+trips8 <- read_csv("trips8.txt")
+trips9 <- read_csv("trips9.txt")
+trips10 <- read_csv("trips10.txt")
+trips11 <- read_csv("trips11.txt")
+trips12 <- read_csv("trips12.txt")
+trips_total <- rbind(trips1,trips2,trips3,trips4,trips5,trips6,
+                     trips7,trips8,trips9,trips10,trips11,trips12) %>% distinct()
+```
+
+```{r}
+trips_stop_time <- inner_join(stop_times_total,trips_total)
+data <- inner_join(trips_stop_time,stop_total) %>% distinct()
+```
+
+
+```{r}
+data <- data%>% 
+  select(route_id,route_pattern_id,stop_id,trip_id,time=arrival_time,
+         pickup_type,drop_off_type,checkpoint_id,service_id,trip_headsign,
+         bikes_allowed,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,
+         level_id,wheelchair_boarding,municipality)
+
+```
+
+## visualization
+
+
+```{r}
+set.seed(0611)
+municipality_sample <- sample(unique(data$municipality),20,replace = F)
+ggplot(subset(data, municipality %in% municipality_sample))+
+  geom_bar(aes(municipality,fill=municipality))+
+  coord_flip()
+```
+Municipality is Lists the name of the city or town in which the stop is located.The data contains 99 municipality, so I just randomly select 20 municipality in this barplot.
+
+```{r}
+ggplot(data,aes(wheelchair_boarding))+
+  geom_bar()+
+  coord_flip()
+```
+For wheelchair_boarding: Additional guidance for bus stop only:
+0: Minor to moderate accessibility barriers exist at the stop. Bus operator may need to relocate bus for safe boarding and exiting.
+2: Significant accessibility barriers exist at the stop. Customers using wheeled mobility devices may need to board at street level.
+
+```{r}
+set.seed(0611)
+route_sample <- sample(unique(data$route_id),20,replace = F)
+ggplot(data = subset(data, route_id %in% route_sample))+
+  geom_bar(aes(route_id,fill=route_id))+
+  coord_flip()
+```
+As the municipathlity, there are 190 different rout_id, I still selelected 20 route_id from the data.
+```{r}
+set.seed(0611)
+stop_name_sample <- sample(unique(data$stop_name),20,replace = F)
+ggplot(data = subset(data, stop_name %in% stop_name_sample))+
+  geom_bar(aes(stop_name,fill=stop_name))+
+  coord_flip()
+```
+For most bus stops, indicates geographic location of stop, with first street listed as the street the bus is traveling on, and second street listed (after "@" or "opp") as the cross street. For stops with a parent_station value, gives the name of the parent station. If more specific information about the stop is desired, place see platform_name (to use in conjunction with stop_name) or stop_desc.
+
+
+```{r}
+set.seed(0611)
+zone_id_sample <- sample(unique(unique(data$zone_id),20,replace=F))
+ggplot(data = subset(data, zone_id %in% zone_id_sample))+
+  geom_bar(aes(zone_id,fill=zone_id))+
+  coord_flip()
+
+```
+Populated with Commuter Rail fare zone information at Commuter Rail stations and stops. Special values may be applied at stations at which multiple fare zones or where special event fares are in effect. 
