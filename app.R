@@ -48,13 +48,16 @@ data <- data%>%
 
 Route <- unique(data$route_id)
 Municipality <- unique(data$municipality)
+Zone <- unique(data$zone_id)
+Bike <- c(0,1)
 
 ui <- fluidPage(
   # Application title
   titlePanel("MBTA"),
   sidebarPanel(
     selectInput("Route","Which route do you want see",Route),
-    selectInput("Municipality","Where city has stops?",Municipality)
+    selectInput("Municipality","Where city has stops?",Municipality),
+    selectInput("Zone","What transport you want to take?",Zone)
   ),
   mainPanel(tabsetPanel(type = "tabs",
                         tabPanel("Map",leafletOutput("map")),
@@ -64,14 +67,16 @@ ui <- fluidPage(
 )
 server <- function(input, output) {
   newdf <- reactive({
-    data %>% filter(route_id%in%input$Route,municipality %in% input$Municipality)
+    data %>% filter(route_id %in% input$Route,
+                    municipality %in% input$Municipality,
+                    zone_id %in% input$Zone)
   })  
   output$map <- renderLeaflet({
     leaflet() %>%
       addTiles() %>%
       addMarkers(lat = newdf()$stop_lat,
                  lng = newdf()$stop_lon,
-                 popup= newdf()$stop_name)
+                 popup= c(newdf()$stop_name,newdf()$time))
   })
   output$table <- renderTable({newdf()})
 }
