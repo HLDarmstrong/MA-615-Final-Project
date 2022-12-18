@@ -119,3 +119,8 @@ ggplot(data = subset(data, zone_id %in% zone_id_sample))+
 
 ```
 Populated with Commuter Rail fare zone information at Commuter Rail stations and stops. Special values may be applied at stations at which multiple fare zones or where special event fares are in effect. 
+
+
+## R shiny
+I use the EDA data sets to build a shiny App. The user will pick the in the conditions of city, route and what transport they would like to see. It will show the stop on the map with stop name on the markers. I also print a table of the time from each stop. My app is working fine, but it took really long time to launch, especially generate the map.
+I was trying to let the Shiny to calculate how long does it take between users selected stop. but the data set contains 2.68millions observations, and those only the one week from each month. And I also need to bring transfers, waiting time and the select markers. 
